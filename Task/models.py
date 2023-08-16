@@ -1,13 +1,16 @@
 from django.db import models
+from TaskApp import settings
 
 
 class Task(models.Model):
     title = models.CharField(max_length=30)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, null=True, blank=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    board = models.ForeignKey('Board', on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -20,7 +23,9 @@ class Task(models.Model):
 
 class Board(models.Model):
     title = models.CharField(max_length=30)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
@@ -28,3 +33,4 @@ class Board(models.Model):
     class Meta:
         verbose_name = "Board"
         verbose_name_plural = "Boards"
+        ordering = ['updated']

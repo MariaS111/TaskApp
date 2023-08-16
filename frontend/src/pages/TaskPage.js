@@ -12,13 +12,13 @@ const TaskPage = () => {
   let getTask = async () => {
     if ({id} === 'new') return
 
-    let response = await fetch(`/tasks/${id}/`)
+    let response = await fetch(`api/task/${id}/`)
     let data = await response.json()
     setTask(data)
 }
 
     let updateTask = async () => {
-        fetch(`/tasks/${id}/`, {
+        fetch(`api/task/${id}/`, {
             method: "PUT",
             headers: {
                 'Content-Type': 'application/json'

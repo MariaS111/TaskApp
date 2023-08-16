@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react'
-import ListItem from '../components/ListItem'
+import React, {useState, useEffect} from 'react';
+import ListItem from '../components/ListItem';
 
 const TaskListPage = () => {
 
@@ -9,7 +9,7 @@ const TaskListPage = () => {
     }, [])  
 
     let getTasks = async () => {
-        let response = await fetch('/tasks/')
+        let response = await fetch('api/task/')
         let data = await response.json()
         console.log(data)
         setTasks(data)
