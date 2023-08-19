@@ -1,13 +1,63 @@
-from django.shortcuts import render
-from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
 from .models import Task, Board
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, BoardSerializer
+
+
+class BoardViewSet(ViewSet):
+    permission_classes = (IsAuthenticated, )
+
+    def list(self, request):
+        user = self.request.user
+        queryset = user.board_set.all()
+        serializer = BoardSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        user = self.request.user
+        queryset = user.board_set.all()
+        board = get_object_or_404(queryset, pk=pk)
+        serializer = BoardSerializer(board)
+        return Response(serializer.data)
+
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     pk = self.kwargs.get("pk")
+    #     if not pk:
+    #         return user.board_set.all()
+    #     return user.board_set.get(pk=pk)
+    def destroy(self, request, pk=None):
+        user = self.request.user
+        queryset = user.board_set.all()
+        board = get_object_or_404(queryset, pk=pk)
+        if board.title == "Main board":
+            return Response({"detail": "Cannot delete the main board."}, status=status.HTTP_403_FORBIDDEN)
+        else:
+            board.delete()
+        return Response({"success: Board deleted"})
+
+
+# class TaskViewSet(ModelViewSet):
+#     serializer_class = TaskSerializer
+#     permission_classes = (IsAuthenticated, )
+
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     pk = self.kwargs.get("pk")
+    #     if not pk:
+    #         return user.task_set.all()
+    #     return user.task_set.filter(pk=pk)
+
+    # @action(methods=['get'], detail=True)
+    # def board(self, request, pk=None):
+    #     boards = Board.objects.all()
+    #     return Response({'boards': [c.title for c in boards]})
 
 
 # @api_view(['GET'])
@@ -45,25 +95,6 @@ from .serializers import TaskSerializer
 #         },
 #     ]
 #     return Response(routes)
-
-
-class TaskViewSet(ModelViewSet):
-    # queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = (IsAuthenticated, )
-
-    def get_queryset(self):
-        user = self.request.user
-        pk = self.kwargs.get("pk")
-        if not pk:
-            return user.task_set.all()
-            # return Task.objects.all()
-        return user.task_set.filter(pk=pk)
-
-    @action(methods=['get'], detail=True)
-    def board(self, request, pk=None):
-        boards = Board.objects.all()
-        return Response({'boards': [c.title for c in boards]})
 
 
 # class TaskApiView(ListCreateAPIView):

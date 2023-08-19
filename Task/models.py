@@ -9,8 +9,7 @@ class Task(models.Model):
     end_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    board = models.ForeignKey('Board', on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    board = models.ForeignKey('Board', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -26,9 +25,10 @@ class Board(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.title
+        return self.title + ' ' + self.user.username
 
     class Meta:
         verbose_name = "Board"
