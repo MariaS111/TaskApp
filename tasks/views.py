@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, action, permission_classes
+from rest_framework.decorators import action, permission_classes
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -10,37 +10,22 @@ from .models import Task, Board
 from .serializers import TaskSerializer, BoardSerializer
 
 
-class BoardViewSet(ViewSet):
+class BoardViewSet(ModelViewSet):
+    serializer_class = BoardSerializer
     permission_classes = (IsAuthenticated, )
 
-    def list(self, request):
+    def get_queryset(self):
         user = self.request.user
-        queryset = user.board_set.all()
-        serializer = BoardSerializer(queryset, many=True)
-        return Response(serializer.data)
+        pk = self.kwargs.get("pk")
+        if not pk:
+            return user.board_set.all()
+        return user.board_set.filter(pk=pk)
 
-    def retrieve(self, request, pk=None):
-        user = self.request.user
-        queryset = user.board_set.all()
-        board = get_object_or_404(queryset, pk=pk)
-        serializer = BoardSerializer(board)
-        return Response(serializer.data)
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     pk = self.kwargs.get("pk")
-    #     if not pk:
-    #         return user.board_set.all()
-    #     return user.board_set.get(pk=pk)
-    def destroy(self, request, pk=None):
-        user = self.request.user
-        queryset = user.board_set.all()
-        board = get_object_or_404(queryset, pk=pk)
+    def destroy(self, request, *args, **kwargs):
+        board = self.get_object()
         if board.title == "Main board":
             return Response({"detail": "Cannot delete the main board."}, status=status.HTTP_403_FORBIDDEN)
-        else:
-            board.delete()
-        return Response({"success: Board deleted"})
+        return super().destroy(request, *args, **kwargs)
 
 
 # class TaskViewSet(ModelViewSet):
@@ -105,7 +90,6 @@ class BoardViewSet(ViewSet):
 # class TaskApiGet(RetrieveUpdateDestroyAPIView):
 #     queryset = Task.objects.all()
 #     serializer_class = TaskSerializer
-
 
 
 # class TaskApiView(APIView):

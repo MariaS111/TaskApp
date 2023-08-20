@@ -1,14 +1,18 @@
 from django.dispatch import receiver
 from .models import Profile, CustomUser
 from django.db.models.signals import post_save
-from Task.models import Board
+from tasks.models import Board
 
 
 @receiver(post_save, sender=CustomUser)
 def create_profile(sender, instance, created, **kwargs):
     if created or not hasattr(instance, 'profile'):
         Profile.objects.get_or_create(user=instance)
-    instance.profile.save()
+
+
+@receiver(post_save, sender=CustomUser)
+def save_profile(sender, instance, **kwargs):
+        instance.userprofile.save()
 
 
 @receiver(post_save, sender=CustomUser)

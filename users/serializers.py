@@ -53,6 +53,34 @@ class RegistrationSerializer(ModelSerializer):
 
 
 class ProfileSerializer(ModelSerializer):
+
     class Meta:
         model = Profile
-        fields = '__all__'
+        fields = ('profile_image', )
+
+
+class CustomUserSerializer(ModelSerializer):
+    userprofile = ProfileSerializer(required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'userprofile')
+
+    def update(self, instance, validated_data):
+        userprofile_data = validated_data.pop('userprofile', {})
+        userprofile_instance = instance.userprofile
+
+        for attr, value in userprofile_data.items():
+            setattr(userprofile_instance, attr, value)
+        userprofile_instance.save()
+
+        for attr, value in validated_data.items():
+
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
+
+
+

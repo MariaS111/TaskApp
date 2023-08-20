@@ -1,4 +1,5 @@
 from django.db import models
+from .validators import validate_not_main_board
 from TaskApp import settings
 
 
@@ -21,7 +22,7 @@ class Task(models.Model):
 
 
 class Board(models.Model):
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=30, validators=[validate_not_main_board])
     description = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
