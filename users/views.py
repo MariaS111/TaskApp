@@ -15,6 +15,7 @@ from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, Update
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer, ProfileSerializer, RegistrationSerializer, CustomUserSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from .tasks import send_verify_email
 
 
 class RegisterView(GenericAPIView):
@@ -34,7 +35,7 @@ class RegisterView(GenericAPIView):
         absurl = 'http://' + current_site + relativeLink + '?token=' + str(token)
         email_body = 'Hello' + ' ' + user.username + '\n' + 'Use link below to verify your email\n' + absurl
         data = {'email_body': email_body, 'to_email': user.email, 'email_subject': 'Verify your email'}
-        Util.send_verification_email.delay(data)
+        send_verify_email.delay(data)
         return Response(user_data, status=status.HTTP_201_CREATED)
 
 
