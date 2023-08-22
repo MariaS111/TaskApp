@@ -28,21 +28,16 @@ class BoardViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-# class TaskViewSet(ModelViewSet):
-#     serializer_class = TaskSerializer
-#     permission_classes = (IsAuthenticated, )
+class TaskViewSet(ModelViewSet):
+    serializer_class = TaskSerializer
+    permission_classes = (IsAuthenticated, )
 
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     pk = self.kwargs.get("pk")
-    #     if not pk:
-    #         return user.task_set.all()
-    #     return user.task_set.filter(pk=pk)
-
-    # @action(methods=['get'], detail=True)
-    # def board(self, request, pk=None):
-    #     boards = Board.objects.all()
-    #     return Response({'boards': [c.title for c in boards]})
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        board = Board.objects.get(pk=self.kwargs.get("board_pk"))
+        if not pk:
+            return board.task_set.all()
+        return board.task_set.filter(pk=pk)
 
 
 # @api_view(['GET'])
@@ -80,17 +75,6 @@ class BoardViewSet(ModelViewSet):
 #         },
 #     ]
 #     return Response(routes)
-
-
-# class TaskApiView(ListCreateAPIView):
-#     queryset = Task.objects.all()
-#     serializer_class = TaskSerializer
-#
-#
-# class TaskApiGet(RetrieveUpdateDestroyAPIView):
-#     queryset = Task.objects.all()
-#     serializer_class = TaskSerializer
-
 
 # class TaskApiView(APIView):
 #     def get(self, request):

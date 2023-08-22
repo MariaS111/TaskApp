@@ -4,6 +4,7 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'board', views.BoardViewSet, basename='board')
+router.register(r'board/(?P<board_pk>\d+)/task', views.TaskViewSet, basename='task')
 
 urlpatterns = [
     path('', include(router.urls))

@@ -1,16 +1,36 @@
+from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
+
 from .validators import validate_not_main_board
 from TaskApp import settings
+
+
+class TaskStatus(models.TextChoices):
+    FUTURE = 'F', 'Future'
+    PROGRESS = 'PR', 'In progress'
+    DONE = 'D', 'Done'
+    OVERDUE = 'O', 'Overdue'
 
 
 class Task(models.Model):
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=200, null=True, blank=True)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateTimeField(validators=[MinValueValidator(limit_value=timezone.now, message='Ensure this '
+                                                                                                      'value is '
+                                                                                                      'greater than '
+                                                                                                      'or equal to '
+                                                                                                      'your start '
+                                                                                                      'date')])
+    end_date = models.DateTimeField(validators=[])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=2,
+        choices=TaskStatus.choices,
+        default=TaskStatus.FUTURE,
+    )
 
     def __str__(self):
         return self.title
@@ -27,6 +47,7 @@ class Board(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    is_private = models.BooleanField(default=True)
 
     def __str__(self):
         return self.title + ' ' + self.user.username
