@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  django:
+    build: .
+    container_name: django
+#    command: python /usr/src/taskapi/manage.py runserver
+    entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
+    volumes:
+      - .:/usr/src/taskapi
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+    depends_on:
+      - pgdb
+
+  pgdb:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    container_name: pgdb
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A TaskApp worker --loglevel=info -P eventlet
+    volumes:
+      - .:/usr/src/taskapi
+    container_name: celery
+    depends_on:
+      - pgdb
+      - redis
+      - django
+
+  celery-beat:
+    build: .
+    command: celery -A TaskApp beat  -l info
+    volumes:
+      - .:/usr/src/taskapi/
+    container_name: celery-beat
+    depends_on:
+      - celery
+      - pgdb
+      - redis
+
+volumes:
+  postgres_data:

@@ -3,18 +3,12 @@ from pathlib import Path
 from decouple import config
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vp(izm34t%vhwyi87^u38c8(snj!&@_qjnyy(niaoyqlm9uytw'
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = int(config("DEBUG", default=0))
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default=[])
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,17 +58,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'TaskApp.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+        'ENGINE': config('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': config('DB_NAME', 'postgres'),
+        'USER': config('DB_USER', 'postgres'),
+        'PASSWORD': config('DB_PASSWORD', 'postgres'),
+        'HOST': config('DB_HOST', 'pgdb'),
+        'PORT': config('DB_PORT', 5432),
     }
 }
 
@@ -85,9 +77,6 @@ DATABASES = {
 #     }
 # }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -104,8 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -115,17 +102,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = 'static/'
 STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -183,14 +164,21 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
+USE_DOCKER = config('USE_DOCKER', default=True)
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-# REDIS_HOST = '127.0.0.1'
-# REDIS_PORT = '6379'
-# CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+# CELERY
+if USE_DOCKER:
+    CELERY_BROKER_URL = 'redis://redis:6379'  # Docker
+else:
+    CELERY_BROKER_URL = 'redis://localhost:6379'  # Local
+
+if USE_DOCKER:
+    CELERY_RESULT_BACKEND = 'redis://redis:6379'   # Docker
+else:
+    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"  # Local
+
+
 CELERY_BROKER_TRANSPORT_OPTION = {'visibility_timeout': 3600}
-# CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_ACCEPT_CONTENT = {'application/json'}
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
