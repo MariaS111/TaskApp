@@ -12,14 +12,16 @@ from .serializers import TaskSerializer, BoardSerializer
 
 class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
+        self.get_permissions()
         user = self.request.user
-        pk = self.kwargs.get("pk")
-        if not pk:
-            return user.board_set.all()
-        return user.board_set.filter(pk=pk)
+        if self.request.user.is_authenticated:
+            pk = self.kwargs.get("pk")
+            if not pk:
+                return user.board_set.all()
+            return user.board_set.filter(pk=pk)
 
     def destroy(self, request, *args, **kwargs):
         board = self.get_object()
@@ -27,18 +29,34 @@ class BoardViewSet(ModelViewSet):
             return Response({"detail": "Cannot delete the main board."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=True, methods=['GET'])
+    def done_tasks(self, request, pk=None):
+        board = self.get_object()
+        done_tasks = board.task_set.filter(status='D')
+        serializer = TaskSerializer(done_tasks, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='done_tasks/(?P<task_pk>[^/.]+)')
+    def done_task(self, request, pk=None, task_pk=None):
+        board = self.get_object()
+        task = board.task_set.get(pk=task_pk, status='D')
+        if task:
+            serializer = TaskSerializer(task, many=False)
+            return Response(serializer.data)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        pk = self.kwargs.get("pk")
-        board = Board.objects.get(pk=self.kwargs.get("board_pk"))
-        if not pk:
-            return board.task_set.all()
-        return board.task_set.filter(pk=pk)
-
+        if self.request.user.is_authenticated:
+            board = get_object_or_404(Board, pk=self.kwargs.get("board_pk"))
+            pk = self.kwargs.get("pk")
+            if not pk:
+                return board.task_set.exclude(status='D')
+            return board.task_set.filter(pk=pk).exclude(status='D')
 
 # @api_view(['GET'])
 # def get_routes(request):

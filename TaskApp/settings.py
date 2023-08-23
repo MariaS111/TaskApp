@@ -39,6 +39,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'TaskApp.urls'
 
+handler404 = 'TaskApp.handlers.custom_not_found'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -113,6 +115,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'TaskApp.handlers.custom_exception_handler',
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer'
