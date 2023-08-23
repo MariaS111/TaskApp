@@ -121,7 +121,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 2
+    'PAGE_SIZE': 5
 }
 
 SIMPLE_JWT = {
@@ -164,7 +164,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-USE_DOCKER = config('USE_DOCKER', default=True)
+USE_DOCKER = config('USE_DOCKER', default=False)
 
 # CELERY
 if USE_DOCKER:

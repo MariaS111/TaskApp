@@ -1,7 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
-
 from .validators import validate_not_main_board
 from TaskApp import settings
 
@@ -20,8 +20,9 @@ class Task(models.Model):
                                                                                                       'value is '
                                                                                                       'greater than '
                                                                                                       'or equal to '
-                                                                                                      'your start '
-                                                                                                      'date')])
+                                                                                                      'your current '
+                                                                                                      'time '
+                                                                                                       )])
     end_date = models.DateTimeField(validators=[])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -31,6 +32,10 @@ class Task(models.Model):
         choices=TaskStatus.choices,
         default=TaskStatus.FUTURE,
     )
+
+    def clean(self):
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError('End date must be greater than start date')
 
     def __str__(self):
         return self.title

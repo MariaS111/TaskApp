@@ -1,5 +1,4 @@
 from django.core.mail import EmailMessage, send_mass_mail
-from TaskApp import settings
 from users.models import CustomUser
 
 

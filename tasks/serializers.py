@@ -1,17 +1,42 @@
+from datetime import datetime, timedelta
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from .models import Task, Board
+from django.core.exceptions import ValidationError
+
+
+class CustomDateTimeField(serializers.DateTimeField):
+    def to_representation(self, value):
+        if value:
+            # return value.strftime('%Y-%m-%dT%H:%M:%S+03:00')
+            return value.strftime('%Y-%m-%d %H:%M')
+        return None
+
+    def to_internal_value(self, value):
+        try:
+            dt = datetime.strptime(value, '%Y-%m-%d %H:%M')
+            dt = dt.replace(second=0, microsecond=0)
+            dt = dt + timedelta(hours=3)
+            return dt
+        except (ValueError, TypeError):
+            raise serializers.ValidationError('Invalid datetime format')
 
 
 class TaskSerializer(ModelSerializer):
+    start_date = CustomDateTimeField()
+    end_date = CustomDateTimeField()
 
     class Meta:
         model = Task
         fields = ("title", "description", "start_date", "end_date")
 
     def validate(self, data):
-        if data['start_date'] > data['end_date']:
-            raise serializers.ValidationError('End date must be greater than start date')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        if start_date and end_date and start_date > end_date:
+            raise ValidationError('End date must be greater than start date')
+
         return data
 
     def create(self, validated_data):
@@ -32,3 +57,5 @@ class BoardSerializer(ModelSerializer):
         user = request.user if request else None
         validated_data['user'] = user
         return super().create(validated_data)
+
+
