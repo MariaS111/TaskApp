@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+import random
 from decouple import config
 import os
 
@@ -8,7 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = int(config("DEBUG", default=0))
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default=[])
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,9 +61,7 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = 'TaskApp.wsgi.application'
-
 
 DATABASES = {
     'default': {
@@ -187,10 +185,9 @@ else:
     CELERY_BROKER_URL = 'redis://localhost:6379'  # Local
 
 if USE_DOCKER:
-    CELERY_RESULT_BACKEND = 'redis://redis:6379'   # Docker
+    CELERY_RESULT_BACKEND = 'redis://redis:6379'  # Docker
 else:
     CELERY_RESULT_BACKEND = "redis://localhost:6379/0"  # Local
-
 
 CELERY_BROKER_TRANSPORT_OPTION = {'visibility_timeout': 3600}
 CELERY_ACCEPT_CONTENT = {'application/json'}
@@ -214,5 +211,5 @@ SOCIAL_AUTH_GITHUB_PROFILE_EXTRA_PARAMS = {
 }
 
 REST_USE_JWT = True
-
 SOCIAL_AUTH_GITHUB_REDIRECT_URI = 'http://127.0.0.1/api/users/profile/'
+

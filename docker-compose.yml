@@ -50,18 +50,6 @@ services:
       - pgdb
       - redis
 
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    restart: on-failure
-    ports:
-      - 80:80
-    volumes:
-      - ./static:/static
-      - ./media:/media
-    depends_on:
-      - django
-
   react-app:
     image: node:14
     container_name: react-app
@@ -73,6 +61,20 @@ services:
     command: npm start
     depends_on:
       - django
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: on-failure
+    ports:
+      - 80:80
+    volumes:
+      - ./static:/static
+      - ./media:/media
+      - ./frontend:/usr/src/taskapi/frontend
+    depends_on:
+      - django
+      - react-app
 
 
 volumes:
