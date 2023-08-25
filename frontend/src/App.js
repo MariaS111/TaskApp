@@ -11,12 +11,6 @@ import LoginPage from './pages/LoginPage'
 import PrivateRoute from './utils/PrivateRoute'
 import {AuthProvider} from './context/AuthContext'
 import RegisterPage from "./pages/RegisterPage";
-// "scripts": {
-//   "start": "react-scripts start",
-//   "build": "react-scripts build",
-//   "test": "react-scripts test",
-//   "eject": "react-scripts eject"
-// },
 
 
 function App() {

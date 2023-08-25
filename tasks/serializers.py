@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from .models import Task, Board
+from .models import Task, Board, TeamTask, TeamBoard
 from django.core.exceptions import ValidationError
 
 
@@ -45,6 +45,15 @@ class TaskSerializer(ModelSerializer):
         return super().create(validated_data)
 
 
+class TeamTaskSerializer(ModelSerializer):
+    start_date = CustomDateTimeField()
+    end_date = CustomDateTimeField()
+
+    class Meta:
+        model = TeamTask
+        fields = ("title", "description", "start_date", "end_date", "status", "worker")
+
+
 class BoardSerializer(ModelSerializer):
     # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -59,3 +68,7 @@ class BoardSerializer(ModelSerializer):
         return super().create(validated_data)
 
 
+class TeamBoardSerializer(BoardSerializer):
+    class Meta:
+        model = TeamBoard
+        fields = ("title", "description", 'user', 'participants', 'admins')

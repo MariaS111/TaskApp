@@ -1,5 +1,5 @@
 from django.utils import timezone
-from .models import Task, TaskStatus
+from tasks.models import Task, TaskStatus
 
 
 class Util:

@@ -1,5 +1,5 @@
 from celery import shared_task
-from .utils import Util
+from tasks.service.utils import Util
 
 
 @shared_task()

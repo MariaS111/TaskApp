@@ -2,6 +2,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
+
+from users.validators import validate_team_member
 from .validators import validate_not_main_board
 from TaskApp import settings
 
@@ -13,7 +15,7 @@ class TaskStatus(models.TextChoices):
     OVERDUE = 'O', 'Overdue'
 
 
-class Task(models.Model):
+class AbstractTask(models.Model):
     title = models.CharField(max_length=30)
     description = models.CharField(max_length=200, null=True, blank=True)
     start_date = models.DateTimeField(validators=[MinValueValidator(limit_value=timezone.now, message='Ensure this '
@@ -23,10 +25,9 @@ class Task(models.Model):
                                                                                                       'your current '
                                                                                                       'time '
                                                                                                        )])
-    end_date = models.DateTimeField(validators=[])
+    end_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    board = models.ForeignKey('Board', on_delete=models.CASCADE)
     status = models.CharField(
         max_length=2,
         choices=TaskStatus.choices,
@@ -41,8 +42,28 @@ class Task(models.Model):
         return self.title
 
     class Meta:
+        abstract = True
+
+
+class Task(AbstractTask):
+    board = models.ForeignKey('Board', on_delete=models.CASCADE)
+
+    class Meta:
         verbose_name = "Task"
         verbose_name_plural = "Tasks"
+        ordering = ['updated']
+
+
+class TeamTask(AbstractTask):
+    worker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, validators=[validate_team_member])
+    team_board = models.ForeignKey('TeamBoard', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return 'TeamTask' + self.title
+
+    class Meta:
+        verbose_name = "TeamTask"
+        verbose_name_plural = "TeamTasks"
         ordering = ['updated']
 
 
@@ -61,3 +82,23 @@ class Board(models.Model):
         verbose_name = "Board"
         verbose_name_plural = "Boards"
         ordering = ['updated']
+
+
+class TeamBoard(Board):
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_participants')
+    admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_admins')
+
+    def __init__(self, *args, **kwargs):
+        if 'is_private' not in kwargs:
+            kwargs['is_private'] = False
+
+        super(TeamBoard, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return 'TeamBoard ' + self.title + ' ' + self.user.username
+
+    class Meta:
+        verbose_name = "Team Board"
+        verbose_name_plural = "Team Boards"
+
+

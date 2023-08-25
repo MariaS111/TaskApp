@@ -1,5 +1,5 @@
 from TaskApp.celery import app
-from .utils import Util
+from users.service.utils import Util
 
 
 @app.task()

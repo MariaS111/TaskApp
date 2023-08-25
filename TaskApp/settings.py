@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'celery',
     'social_django',
+    'rest_social_auth',
     'tasks.apps.TasksConfig',
     'users.apps.UsersConfig',
 ]
@@ -207,7 +208,11 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 SOCIAL_AUTH_GITHUB_KEY = config('SOCIAL_AUTH_GITHUB_KEY')
 SOCIAL_AUTH_GITHUB_SECRET = config('SOCIAL_AUTH_GITHUB_SECRET')
-SOCIAL_AUTH_GITHUB_SCOPE = ['username']
+SOCIAL_AUTH_GITHUB_SCOPE = ['email', ]
 SOCIAL_AUTH_GITHUB_PROFILE_EXTRA_PARAMS = {
-    'fields': 'email, first_name, last_name'
+    'fields': 'username, first_name, last_name'
 }
+
+REST_USE_JWT = True
+
+SOCIAL_AUTH_GITHUB_REDIRECT_URI = 'http://127.0.0.1/api/users/profile/'
