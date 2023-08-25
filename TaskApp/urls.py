@@ -1,13 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import permissions
-from rest_framework_simplejwt.views import (
-    TokenRefreshView, TokenVerifyView,
-)
-from users.views import MyTokenObtainPairView, AvatarUpdateView, UserProfileView, RegisterView, VerifyEmail
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-
+from django.conf.urls.static import static
+from TaskApp import settings
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -25,14 +22,12 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('tasks.urls')),
-    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    path('api/register/', RegisterView.as_view(), name='register'),
-    path('api/verify-email/', VerifyEmail.as_view(), name='verify_email'),
-    path('api/profile/', UserProfileView.as_view(), name='profile'),
-    path('api/profile/avatar-update/', AvatarUpdateView.as_view(), name='avatar_update'),
+    path('api/users/', include('users.urls')),
     # re_path(r'^swagger(?P\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

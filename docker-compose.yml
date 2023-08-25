@@ -4,10 +4,11 @@ services:
   django:
     build: .
     container_name: django
-#    command: python /usr/src/taskapi/manage.py runserver
     entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
     volumes:
       - .:/usr/src/taskapi
+      - ./static:/usr/src/taskapi/static
+      - ./media:/usr/src/taskapi/media
     ports:
       - 8000:8000
     env_file:
@@ -48,6 +49,31 @@ services:
       - celery
       - pgdb
       - redis
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: on-failure
+    ports:
+      - 80:80
+    volumes:
+      - ./static:/static
+      - ./media:/media
+    depends_on:
+      - django
+
+  react-app:
+    image: node:14
+    container_name: react-app
+    working_dir: /usr/src/taskapi/frontend
+    volumes:
+      - ./frontend:/usr/src/taskapi/frontend
+    ports:
+      - 3000:3000
+    command: npm start
+    depends_on:
+      - django
+
 
 volumes:
   postgres_data:

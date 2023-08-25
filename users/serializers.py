@@ -53,10 +53,9 @@ class RegistrationSerializer(ModelSerializer):
 
 
 class ProfileSerializer(ModelSerializer):
-
     class Meta:
         model = Profile
-        fields = ('profile_image', )
+        fields = ('profile_image',)
 
 
 class CustomUserSerializer(ModelSerializer):
@@ -75,12 +74,7 @@ class CustomUserSerializer(ModelSerializer):
         userprofile_instance.save()
 
         for attr, value in validated_data.items():
-
             setattr(instance, attr, value)
         instance.save()
 
         return instance
-
-
-
-
