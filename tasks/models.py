@@ -24,7 +24,7 @@ class AbstractTask(models.Model):
                                                                                                       'or equal to '
                                                                                                       'your current '
                                                                                                       'time '
-                                                                                                       )])
+                                                                    )])
     end_date = models.DateTimeField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -38,15 +38,15 @@ class AbstractTask(models.Model):
         if self.start_date and self.end_date and self.start_date > self.end_date:
             raise ValidationError('End date must be greater than start date')
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         abstract = True
 
 
 class Task(AbstractTask):
     board = models.ForeignKey('Board', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         verbose_name = "Task"
@@ -55,11 +55,11 @@ class Task(AbstractTask):
 
 
 class TeamTask(AbstractTask):
-    worker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, validators=[validate_team_member])
+    worker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, validators=[validate_team_member], blank=True, null=True)
     team_board = models.ForeignKey('TeamBoard', on_delete=models.CASCADE)
 
     def __str__(self):
-        return 'TeamTask' + self.title
+        return 'TeamTask' + ' ' + self.title
 
     class Meta:
         verbose_name = "TeamTask"
@@ -67,13 +67,18 @@ class TeamTask(AbstractTask):
         ordering = ['updated']
 
 
-class Board(models.Model):
+class AbstractBoard(models.Model):
     title = models.CharField(max_length=30, validators=[validate_not_main_board])
     description = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    is_private = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+
+
+class Board(AbstractBoard):
 
     def __str__(self):
         return self.title + ' ' + self.user.username
@@ -84,15 +89,9 @@ class Board(models.Model):
         ordering = ['updated']
 
 
-class TeamBoard(Board):
+class TeamBoard(AbstractBoard):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_participants')
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_admins')
-
-    def __init__(self, *args, **kwargs):
-        if 'is_private' not in kwargs:
-            kwargs['is_private'] = False
-
-        super(TeamBoard, self).__init__(*args, **kwargs)
 
     def __str__(self):
         return 'TeamBoard ' + self.title + ' ' + self.user.username
@@ -100,5 +99,3 @@ class TeamBoard(Board):
     class Meta:
         verbose_name = "Team Board"
         verbose_name_plural = "Team Boards"
-
-

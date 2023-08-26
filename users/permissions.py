@@ -7,13 +7,13 @@ class IsCreator(BasePermission):
         return obj.user == request.user
 
 
-class IsInParticipants(BasePermission):
+class IsInParticipantsInAdminsOrCreator(BasePermission):
     def has_permission(self, request, view):
         obj = view.get_object()
-        return request.user in obj.participants.all()
+        return request.user in obj.participants.all() or obj.user == request.user or request.user in obj.admins.all()
 
 
-class IsInAdmins(BasePermission):
+class IsInAdminsOrCreator(BasePermission):
     def has_permission(self, request, view):
         obj = view.get_object()
-        return request.user in obj.admins.all()
+        return request.user in obj.admins.all() or obj.user == request.user

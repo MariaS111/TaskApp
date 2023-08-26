@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
@@ -6,8 +7,9 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
-from .models import Task, Board
-from .serializers import TaskSerializer, BoardSerializer
+from users.permissions import IsCreator, IsInAdminsOrCreator, IsInParticipantsInAdminsOrCreator
+from .models import Task, Board, TeamBoard
+from .serializers import TaskSerializer, BoardSerializer, TeamBoardSerializer, TeamTaskSerializer
 
 
 class BoardViewSet(ModelViewSet):
@@ -15,9 +17,8 @@ class BoardViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        self.get_permissions()
         user = self.request.user
-        if self.request.user.is_authenticated:
+        if user.is_authenticated:
             pk = self.kwargs.get("pk")
             if not pk:
                 return user.board_set.all()
@@ -46,6 +47,29 @@ class BoardViewSet(ModelViewSet):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+class TeamBoardViewSet(ModelViewSet):
+    serializer_class = TeamBoardSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            pk = self.kwargs.get("pk")
+            if not pk:
+                return TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user))
+            return TeamBoard.objects.filter(Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user)))
+
+    def get_permissions(self):
+        if self.action == 'retrieve' or self.action == 'list':
+            permission_classes = [IsAuthenticated, IsInParticipantsInAdminsOrCreator]
+        elif self.action == 'delete':
+            permission_classes = [IsAuthenticated, IsCreator]
+        elif self.action == 'update' or self.action == 'partial_update':
+            permission_classes = [IsAuthenticated, IsInAdminsOrCreator]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
 class TaskViewSet(ModelViewSet):
     serializer_class = TaskSerializer
     permission_classes = (IsAuthenticated,)
@@ -58,73 +82,25 @@ class TaskViewSet(ModelViewSet):
                 return board.task_set.exclude(status='D')
             return board.task_set.filter(pk=pk).exclude(status='D')
 
-# @api_view(['GET'])
-# def get_routes(request):
-#     routes = [
-#         {
-#             'Endpoint': 'api/tasks/',
-#             'method': 'GET',
-#             'body': None,
-#             'description': 'Returns an array of tasks'
-#         },
-#         {
-#             'Endpoint': 'api/tasks/id',
-#             'method': 'GET',
-#             'body': None,
-#             'description': 'Returns a single task object'
-#         },
-#         {
-#             'Endpoint': 'api/tasks/create/',
-#             'method': 'POST',
-#             'body': {'body': ""},
-#             'description': 'Creates new task with data sent in post request'
-#         },
-#         {
-#             'Endpoint': 'api/tasks/id/update/',
-#             'method': 'PUT',
-#             'body': {'body': ""},
-#             'description': 'Creates an existing task with data sent in post request'
-#         },
-#         {
-#             'Endpoint': 'api/tasks/id/delete/',
-#             'method': 'DELETE',
-#             'body': None,
-#             'description': 'Deletes and exiting task'
-#         },
-#     ]
-#     return Response(routes)
 
-# class TaskApiView(APIView):
-#     def get(self, request):
-#         tasks = Task.objects.all()
-#         return Response({'tasks': TaskSerializer(tasks, many=True).data})
-#
-#     def post(self, request):
-#         serializer = TaskSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response({'task': serializer.data})
-#
-#     def put(self, request, *args, **kwargs):
-#         pk = kwargs.get("pk", None)
-#         if not pk:
-#             return Response({"error": 'Method PUT is not allowed'})
-#         try:
-#             instance = Task.objects.get(pk=pk)
-#         except:
-#             return Response({"error": "Object does not exists"})
-#         serializer = TaskSerializer(data=request.data, instance=instance)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response({"task": serializer.data})
-#
-#     def delete(self, request, *args, **kwargs):
-#         pk = kwargs.get("pk", None)
-#         if not pk:
-#             return Response({"error": 'Method DELETE is not allowed'})
-#         try:
-#             instance = Task.objects.get(pk=pk)
-#         except:
-#             return Response({"error": "Object does not exists"})
-#         instance.delete()
-#         return Response({"task": "delete task" + str(pk)})
+class TeamTaskViewSet(ModelViewSet):
+    serializer_class = TeamTaskSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            teamboard = get_object_or_404(TeamBoard, pk=self.kwargs.get("teamboard_pk"))
+            pk = self.kwargs.get("pk")
+            if not pk:
+                return teamboard.teamtask_set.exclude(status='D')
+            return teamboard.teamtask_set.filter(pk=pk).exclude(status='D')
+
+    def get_permissions(self):
+        if self.action == 'retrieve' or self.action == 'list' or self.action == 'partial_update':
+            permission_classes = [IsAuthenticated, ]
+        else:
+            permission_classes = [IsAuthenticated, ]
+        return [permission() for permission in permission_classes]
+
+    def partial_update(self, request, *args, **kwargs):
+        pass

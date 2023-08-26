@@ -55,7 +55,6 @@ class TeamTaskSerializer(ModelSerializer):
 
 
 class BoardSerializer(ModelSerializer):
-    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Board
@@ -68,7 +67,13 @@ class BoardSerializer(ModelSerializer):
         return super().create(validated_data)
 
 
-class TeamBoardSerializer(BoardSerializer):
+class TeamBoardSerializer(ModelSerializer):
     class Meta:
         model = TeamBoard
         fields = ("title", "description", 'user', 'participants', 'admins')
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+        validated_data['user'] = user
+        return super().create(validated_data)
