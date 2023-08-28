@@ -2,8 +2,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
-
-from users.validators import validate_team_member
 from .validators import validate_not_main_board
 from TaskApp import settings
 
@@ -55,7 +53,7 @@ class Task(AbstractTask):
 
 
 class TeamTask(AbstractTask):
-    worker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, validators=[validate_team_member], blank=True, null=True)
+    worker = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,  blank=True, null=True)
     team_board = models.ForeignKey('TeamBoard', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -72,7 +70,7 @@ class AbstractBoard(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, editable=False)
 
     class Meta:
         abstract = True
@@ -90,8 +88,8 @@ class Board(AbstractBoard):
 
 
 class TeamBoard(AbstractBoard):
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_participants')
-    admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_admins')
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_participants', blank=True)
+    admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_admins', blank=True)
 
     def __str__(self):
         return 'TeamBoard ' + self.title + ' ' + self.user.username

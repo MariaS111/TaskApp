@@ -1,13 +1,16 @@
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.decorators import action, permission_classes
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
-from users.permissions import IsCreator, IsInAdminsOrCreator, IsInParticipantsInAdminsOrCreator
+from users.permissions import IsCreator, IsInAdminsOrCreator, IsInParticipantsInAdminsOrCreator, \
+    IsCreatorOrInAdminsForTask, \
+    IsCreatorOrInParticipantsOrInAdminsForTask, IsCreatorOrInAdminsForCreatingTask
 from .models import Task, Board, TeamBoard
 from .serializers import TaskSerializer, BoardSerializer, TeamBoardSerializer, TeamTaskSerializer
 
@@ -58,16 +61,32 @@ class TeamBoardViewSet(ModelViewSet):
                 return TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user))
             return TeamBoard.objects.filter(Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user)))
 
-    def get_permissions(self):
-        if self.action == 'retrieve' or self.action == 'list':
-            permission_classes = [IsAuthenticated, IsInParticipantsInAdminsOrCreator]
-        elif self.action == 'delete':
-            permission_classes = [IsAuthenticated, IsCreator]
-        elif self.action == 'update' or self.action == 'partial_update':
-            permission_classes = [IsAuthenticated, IsInAdminsOrCreator]
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user == request.user:
+            self.perform_destroy(instance)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+            return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user in instance.admins.all():
+            if 'participants' in request.data and len(request.data) == 1:
+                self.perform_update(instance)
+                return super().partial_update(request, *args, **kwargs)
+            else:
+                return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [IsAuthenticated(), IsInParticipantsInAdminsOrCreator()]
+        elif self.action == 'update':
+            return [IsAuthenticated(), IsCreator()]
+        elif self.action == 'partial_update':
+            return [IsAuthenticated(), IsInAdminsOrCreator()]
+        return [IsAuthenticated()]
 
 
 class TaskViewSet(ModelViewSet):
@@ -85,22 +104,45 @@ class TaskViewSet(ModelViewSet):
 
 class TeamTaskViewSet(ModelViewSet):
     serializer_class = TeamTaskSerializer
-    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            teamboard = get_object_or_404(TeamBoard, pk=self.kwargs.get("teamboard_pk"))
+            user = self.request.user
+            teamboards = TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user))
+            teamboard = get_object_or_404(teamboards, pk=self.kwargs.get("teamboard_pk"))
             pk = self.kwargs.get("pk")
             if not pk:
                 return teamboard.teamtask_set.exclude(status='D')
             return teamboard.teamtask_set.filter(pk=pk).exclude(status='D')
 
     def get_permissions(self):
-        if self.action == 'retrieve' or self.action == 'list' or self.action == 'partial_update':
-            permission_classes = [IsAuthenticated, ]
+        if self.action in ['retrieve', 'partial_update']:
+            return [IsAuthenticated(), IsCreatorOrInParticipantsOrInAdminsForTask()]
+        elif self.action == 'update':
+            return [IsAuthenticated(), IsCreatorOrInAdminsForTask()]
+        elif self.action == 'create':
+            return [IsAuthenticated(), IsCreatorOrInAdminsForCreatingTask()]
+        return [IsAuthenticated()]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        team_board = instance.team_board
+        if user == team_board.user or user in team_board.admins.all():
+            self.perform_destroy(instance)
+            return Response({"detail": "Object deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         else:
-            permission_classes = [IsAuthenticated, ]
-        return [permission() for permission in permission_classes]
+            return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
 
     def partial_update(self, request, *args, **kwargs):
-        pass
+        instance = self.get_object()
+        team_board = instance.team_board
+        if request.user in team_board.participants.all():
+            if 'worker' in request.data and len(request.data) == 1:
+                self.perform_update(instance)
+                return super().partial_update(request, *args, **kwargs)
+            else:
+                return Response({"detail": "You don't have permission to do this"},
+                                status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, *args, **kwargs)
+
