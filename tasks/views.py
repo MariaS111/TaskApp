@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
+
+from users.models import CustomUser
 from users.permissions import IsCreator, IsInAdminsOrCreator, IsInParticipantsInAdminsOrCreator, \
     IsCreatorOrInAdminsForTask, \
     IsCreatorOrInParticipantsOrInAdminsForTask, IsCreatorOrInAdminsForCreatingTask
@@ -58,8 +60,8 @@ class TeamBoardViewSet(ModelViewSet):
         if user.is_authenticated:
             pk = self.kwargs.get("pk")
             if not pk:
-                return TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user))
-            return TeamBoard.objects.filter(Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user)))
+                return TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user)).distinct('pk')
+            return TeamBoard.objects.filter(Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user))).distinct('pk')
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -73,10 +75,18 @@ class TeamBoardViewSet(ModelViewSet):
         instance = self.get_object()
         if request.user in instance.admins.all():
             if 'participants' in request.data and len(request.data) == 1:
-                self.perform_update(instance)
+                # request.data._mutable = True
+                print(type(request.data['participants']))
+                # request.data['participants'] = list(map(lambda x: int(x), request.data['participants'].split()))
+                print(type(request.data['participants']), request.data['participants'])
+                # pks = request.data.get('participants', None).split()
+                # if all(get_object_or_404(CustomUser, pk=int(pk)) != instance.user and get_object_or_404(CustomUser,
+                #                                                                                         pk=int(pk))
+                #        not in instance.admins.all() and get_object_or_404(CustomUser, pk=int(pk))
+                #        not in instance.participants.all() for pk in pks):
+                # self.perform_update(instance)
                 return super().partial_update(request, *args, **kwargs)
-            else:
-                return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
         return super().partial_update(request, *args, **kwargs)
 
     def get_permissions(self):
@@ -135,14 +145,22 @@ class TeamTaskViewSet(ModelViewSet):
             return Response({"detail": "You don't have permission to do this"}, status=status.HTTP_403_FORBIDDEN)
 
     def partial_update(self, request, *args, **kwargs):
+        user = request.user
         instance = self.get_object()
-        team_board = instance.team_board
-        if request.user in team_board.participants.all():
-            if 'worker' in request.data and len(request.data) == 1:
-                self.perform_update(instance)
+        participants = instance.team_board.participants.all()
+        if user in participants:
+            if 'worker' in request.data and len(request.data) == 1 and int(request.data['worker']) == user.pk:
                 return super().partial_update(request, *args, **kwargs)
             else:
                 return Response({"detail": "You don't have permission to do this"},
                                 status=status.HTTP_403_FORBIDDEN)
-        return super().partial_update(request, *args, **kwargs)
-
+        else:
+            if 'worker' in request.data:
+                pk = request.data.get('worker', None)
+                user = get_object_or_404(CustomUser, pk=pk)
+                if user in participants or user in instance.team_board.admins.all() or user == instance.team_board.user:
+                    return super().partial_update(request, *args, **kwargs)
+                else:
+                    return Response({"detail": "Invalid worker in request data"},
+                                    status=status.HTTP_403_FORBIDDEN)
+            return super().partial_update(request, *args, **kwargs)
