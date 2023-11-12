@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'rest_social_auth',
     'tasks.apps.TasksConfig',
     'users.apps.UsersConfig',
+    'projects.apps.ProjectsConfig'
 ]
 
 MIDDLEWARE = [

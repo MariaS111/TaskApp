@@ -90,6 +90,7 @@ class Board(AbstractBoard):
 class TeamBoard(AbstractBoard):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_participants', blank=True)
     admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='teamboard_admins', blank=True)
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return 'TeamBoard ' + self.title + ' ' + self.user.username
