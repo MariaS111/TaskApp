@@ -7,23 +7,24 @@ import AuthContext from '../context/AuthContext';
 const Header = () => {
   let {user, logoutUser, continueWithGithub} = useContext(AuthContext)
   return (
-    <div>
-      <h1>Task App</h1>
-      <Link to="/" >Home</Link>
+    <div class="header">
+         <Link  to="/" class="icon-link" >My Boards</Link>
+         <Link  to="#" class="icon-link" >Team Boards</Link>
+         <Link  to="#" class="icon-link" >Projects</Link>
             {user ? (
-              <div class='span'>
-                 <a  onClick={logoutUser}>Logout</a> 
-                 <Link to="/profile">Profile</Link>
+             <div class="horizontal">
+              <Link to="/profile" class="icon-link">Profile</Link>
+              <a onClick={logoutUser} class="icon-link">Logout</a> 
               </div>
             ): (
-              <div class='span'>
-                <button>Login with GitHub</button>
-                <Link to="/login" >Login</Link> 
-                <Link to="/register" >Registration</Link>
+              <div class="horizontal">
+                {/* <button type="button" class="btn btn-primary">Login with GitHub</button> */}
+                <Link to="/login" class="icon-link">Login</Link> 
+                <Link to="/register" class="icon-link">Registration</Link>
               </div>
             )}
-        {user && <p>Hello {user.username}</p>}
     </div>
+   
   )
 }
 

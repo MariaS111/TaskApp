@@ -29,12 +29,24 @@ const HomePage = () => {
   }
 
   return (
-      <div>
-          <ul>
-              {Array.isArray(boards.results) && boards.results.map(board => (
-                  <li key={board.id} >{board.title}</li>
-              ))}
-          </ul>
+      <div class="boards">   
+        {Array.isArray(boards.results) && boards.results.map(board => (
+                //   <li key={board.id} >{board.title}</li>
+            
+          <div key={board.id} class="card text-center">
+            {/* <div class="card-header">
+                Featured
+            </div> */}
+            <div class="card-body">
+                <h5 key={board.id} class="card-title">{board.title}</h5>
+                <p key={board.id} class="card-text">{board.description}</p>
+                <a href="#" class="btn btn-primary">Show...</a>
+            </div>
+            {/* <div class="card-footer text-body-secondary">
+                2 days ago
+            </div> */}
+            </div>
+             ))}
       </div>
   )
 }

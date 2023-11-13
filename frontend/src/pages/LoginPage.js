@@ -6,10 +6,10 @@ function LoginPage() {
   let {loginUser} = useContext(AuthContext)
   return (
     <div>
-        <form onSubmit={loginUser}>
-            <input type="text" name="username" placeholder='Enter username'/>
-            <input type="password" name="password" placeholder='Enter password'/>
-            <input type='submit'/>
+        <form onSubmit={loginUser} class="input-form">
+            <input class="form-control" type="text" name="username" placeholder='Enter username'/>
+            <input class="form-control" type="password" name="password" placeholder='Enter password'/>
+            <input type='submit' class="btn btn-primary"/>
         </form>
     </div>
   )

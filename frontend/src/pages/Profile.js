@@ -37,15 +37,19 @@ const Profile = () => {
   }
 
   return (
-      <div>
+      <div class="profile">
         <img src={profile.userprofile.profile_image} class='profile-image' alt="Profile Image"></img>
-          <ul>
-              <li>{profile.username}</li>
-              <li>{profile.first_name}</li>
-              <li>{profile.last_name}</li>
-              <li>{profile.email}</li>
-              <li>{profile.is_verified ? 'Email is verified' : 'Email not verified'}</li>
+          <ul class="list-group">
+              <li class="list-group-item">Username: {profile.username}</li>
+              <li class="list-group-item">First name: {profile.first_name}</li>
+              <li class="list-group-item">Last name: {profile.last_name}</li>
+              <li class="list-group-item">Email: {profile.email}</li>
+              <li class="list-group-item">{profile.is_verified ? 'Email is verified' : 'Email not verified'}</li>
           </ul>
+          <div class="btns">
+            <button class="btn btn-primary">Change profile information</button>
+
+          </div>
       </div>
   )
 }
