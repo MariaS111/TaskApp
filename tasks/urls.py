@@ -7,6 +7,7 @@ router.register(r'board', views.BoardViewSet, basename='board')
 router.register(r'board/(?P<board_pk>\d+)/task', views.TaskViewSet, basename='task')
 router.register(r'teamboard', views.TeamBoardViewSet, basename='teamboard')
 router.register(r'teamboard/(?P<teamboard_pk>\d+)/teamtask', views.TeamTaskViewSet, basename='teamtask')
+router.register(r'teamboard/(?P<teamboard_pk>\d+)/teamtask/(?P<teamtask_pk>\d+)/comments', views.CommentViewSet, basename='comments')
 
 urlpatterns = [
     path('', include(router.urls)),

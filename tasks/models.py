@@ -70,7 +70,7 @@ class AbstractBoard(models.Model):
     description = models.CharField(max_length=200, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
@@ -98,3 +98,16 @@ class TeamBoard(AbstractBoard):
     class Meta:
         verbose_name = "TeamBoard"
         verbose_name_plural = "TeamBoards"
+
+
+class Comment(models.Model):
+    content = models.CharField(max_length=500)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    team_task = models.ForeignKey("tasks.TeamTask", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return 'Comment from ' + self.user.username
+
+    class Meta:
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"

@@ -14,6 +14,12 @@ class IsCreator(BasePermission):
         return obj.user == request.user
 
 
+class IsInWatchersOrCreator(BasePermission):
+    def has_permission(self, request, view):
+        obj = view.get_object()
+        return request.user in obj.watchers.all() or obj.user == request.user
+
+
 class IsInParticipantsInAdminsOrCreator(BasePermission):
     def has_permission(self, request, view):
         obj = view.get_object()

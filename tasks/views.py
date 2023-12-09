@@ -8,13 +8,12 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
-
 from users.models import CustomUser
 from users.permissions import IsCreator, IsInAdminsOrCreator, IsInParticipantsInAdminsOrCreator, \
     IsCreatorOrInAdminsForTask, \
-    IsCreatorOrInParticipantsOrInAdminsForTask, IsCreatorOrInAdminsForCreatingTask
-from .models import Task, Board, TeamBoard
-from .serializers import TaskSerializer, BoardSerializer, TeamBoardSerializer, TeamTaskSerializer
+    IsCreatorOrInParticipantsOrInAdminsForTask, IsCreatorOrInAdminsForCreatingTask, IsCommentOwner, CanViewComments
+from .models import Task, Board, TeamBoard, Comment
+from .serializers import TaskSerializer, BoardSerializer, TeamBoardSerializer, TeamTaskSerializer, CommentSerializer
 
 
 class BoardViewSet(ModelViewSet):
@@ -60,8 +59,8 @@ class TeamBoardViewSet(ModelViewSet):
         if user.is_authenticated:
             pk = self.kwargs.get("pk")
             if not pk:
-                return TeamBoard.objects.filter(Q(user=user) | Q(participants=user) | Q(admins=user)).distinct('pk')
-            return TeamBoard.objects.filter(Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user))).distinct('pk')
+                return TeamBoard.objects.filter(Q(project=None) & Q(Q(user=user) | Q(participants=user) | Q(admins=user))).distinct('pk')
+            return TeamBoard.objects.filter(Q(project=None) & Q(pk=pk) & Q(Q(user=user) | Q(participants=user) | Q(admins=user))).distinct('pk')
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -164,3 +163,20 @@ class TeamTaskViewSet(ModelViewSet):
                     return Response({"detail": "Invalid worker in request data"},
                                     status=status.HTTP_403_FORBIDDEN)
             return super().partial_update(request, *args, **kwargs)
+
+
+class CommentViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+
+    def get_permissions(self):
+        if self.action in ['partial_update', 'update', 'destroy']:
+            return [IsCommentOwner()]
+        else:
+            return [IsAuthenticated(), CanViewComments()]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user, team_task_id=self.kwargs['teamtask_pk'])
+
+    def get_queryset(self):
+        team_task_pk = self.kwargs['teamtask_pk']
+        return Comment.objects.filter(team_task_id=team_task_pk)

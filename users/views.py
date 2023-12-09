@@ -9,9 +9,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Profile, CustomUser
-from rest_framework.generics import RetrieveUpdateAPIView, UpdateAPIView, GenericAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, UpdateAPIView, GenericAPIView, ListAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer, ProfileSerializer, RegistrationSerializer, CustomUserSerializer
+from .serializers import MyTokenObtainPairSerializer, ProfileSerializer, RegistrationSerializer, CustomUserSerializer, \
+    CustomUserSerializerforGET
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .tasks import send_verify_email
 
@@ -86,3 +87,7 @@ class AvatarUpdateView(UpdateAPIView):
         serializer.save(user=instance.user)
 
 
+class UsersAllView(ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializerforGET
+    permission_classes = (IsAuthenticated,)

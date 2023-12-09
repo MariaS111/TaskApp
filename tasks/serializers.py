@@ -1,9 +1,16 @@
 from datetime import datetime, timedelta
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from .models import Task, Board, TeamTask, TeamBoard
+from .models import Task, Board, TeamTask, TeamBoard, Comment
 from django.core.exceptions import ValidationError
 from pytz import timezone as pytz_timezone
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'content', 'user', 'team_task']
+        read_only_fields = ['id', 'user', 'team_task']
 
 
 class CustomDateTimeField(serializers.DateTimeField):

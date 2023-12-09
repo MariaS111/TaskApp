@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from .models import Comment
+from projects.models import Project
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comment
-        fields = ['id', 'content', 'user', 'team_task']
-        read_only_fields = ['id', 'user', 'team_task']
+        model = Project
+        fields = ['title', 'description', 'created', 'user', 'watchers']
+        read_only_fields = ['created']
+
+
