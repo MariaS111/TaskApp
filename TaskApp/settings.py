@@ -26,7 +26,8 @@ INSTALLED_APPS = [
     'rest_social_auth',
     'tasks.apps.TasksConfig',
     'users.apps.UsersConfig',
-    'projects.apps.ProjectsConfig'
+    'projects.apps.ProjectsConfig',
+    'drf_spectacular'
 ]
 
 MIDDLEWARE = [
@@ -128,6 +129,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer'
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -136,7 +138,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -214,3 +216,9 @@ SOCIAL_AUTH_GITHUB_PROFILE_EXTRA_PARAMS = {
 REST_USE_JWT = True
 SOCIAL_AUTH_GITHUB_REDIRECT_URI = 'http://127.0.0.1/api/users/profile/'
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Task App API',
+    'DESCRIPTION': 'Task App project',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}

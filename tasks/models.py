@@ -96,5 +96,5 @@ class TeamBoard(AbstractBoard):
         return 'TeamBoard ' + self.title + ' ' + self.user.username
 
     class Meta:
-        verbose_name = "Team Board"
-        verbose_name_plural = "Team Boards"
+        verbose_name = "TeamBoard"
+        verbose_name_plural = "TeamBoards"
