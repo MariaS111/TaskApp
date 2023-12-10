@@ -54,6 +54,10 @@ body{
 
 }
 
+.for-task {
+    height: 400px;
+}
+
 .register-form {
     width: 700px;
     height: 500px;
@@ -68,7 +72,7 @@ a:hover {
    cursor: pointer;
 }
 
-div {
+.div {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -113,14 +117,50 @@ div {
 
 .boards {
     width: 85%;
-
 }
 
 .card {
     width: 85%;
     height: 200px;
+    text-align: center;
 }
 
 .card-body {
     gap: 20px;
+}
+
+.board-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 30px;
+    padding-bottom: 40px;
+}
+
+.board-actions {
+    display: flex;
+    column-gap: 10px;
+    align-self: flex-end;
+}
+
+.tasks {
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 30px;
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    row-gap: 30px;
+}
+
+.whole-width {
+    width: 100%;
 }

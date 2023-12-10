@@ -5,7 +5,7 @@ import AuthContext from "../context/AuthContext";
 function RegisterPage() {
   let {registerUser} = useContext(AuthContext)
   return (
-    <div>
+    <div class="div">
         <form onSubmit={registerUser} class="input-form register-form">
             <input class="form-control" type="text" name="username" placeholder='Enter username'/>
             <input class="form-control" type="password" name="password" placeholder='Enter password'/>

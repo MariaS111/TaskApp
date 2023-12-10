@@ -2,17 +2,17 @@ import {useState, useEffect, useContext} from 'react'
 import { Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext'
 
-const HomePage = () => {
-  let [boards, setBoards] = useState([])
+const ProjectsPage = () => {
+  let [projects, setProjects] = useState([])
   let {authTokens, logoutUser} = useContext(AuthContext)
 
   useEffect(()=> {
-      getBoards()
+      getProjects()
   }, [])
 
 
-  let getBoards = async() =>{
-      let response = await fetch('http://127.0.0.1:8000/api/board/', {
+  let getProjects = async() =>{
+      let response = await fetch('http://127.0.0.1:8000/api/projects/project', {
           method:'GET',
           headers:{
               'Content-Type':'application/json',
@@ -22,7 +22,7 @@ const HomePage = () => {
       let data = await response.json()
 
       if(response.status === 200){
-          setBoards(data)
+          setProjects(data)
       }else if(response.statusText === 'Unauthorized'){
           logoutUser()
       }
@@ -31,18 +31,18 @@ const HomePage = () => {
 
   return (
       <div class="div boards">
-        <Link to={`/boards/add`} className="btn btn-primary">
-                Add new board
+        <Link to={`/projects/add`} className="btn btn-primary">
+                Add new project
         </Link>
         <div class="div boards">   
-        {Array.isArray(boards.results) && boards.results.map(board => (
+        {Array.isArray(projects.results) && projects.results.map(project => (
             
-          <div key={board.id} class="div card text-center">
+          <div key={project.id} class="div card text-center">
             <div class="div card-body">
-                <h5 key={board.id} class="card-title">{board.title}</h5>
-                <p key={board.id} class="card-text">{board.description}</p>
+                <h5 key={project.id} class="card-title">{project.title}</h5>
+                <p key={project.id} class="card-text">{project.description}</p>
                 {/* <a href="#" class="btn btn-primary">Show...</a> */}
-                <Link to={`/boards/${board.id}/tasks`} className="btn btn-primary">
+                <Link to={`/projects/${project.id}/boards`} className="btn btn-primary">
                 Show more...
                 </Link>
 
@@ -54,4 +54,4 @@ const HomePage = () => {
   )
 }
 
-export default HomePage
+export default ProjectsPage

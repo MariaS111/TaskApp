@@ -35,7 +35,7 @@ class TaskSerializer(ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ("title", "description", "start_date", "end_date", "status")
+        fields = ("id", "title", "description", "start_date", "end_date", "status")
 
     def validate(self, data):
         start_date = data.get('start_date')
@@ -58,7 +58,7 @@ class TeamTaskSerializer(ModelSerializer):
 
     class Meta:
         model = TeamTask
-        fields = ("title", "description", "start_date", "end_date", "status", "worker")
+        fields = ("id", "title", "description", "start_date", "end_date", "status", "worker")
 
     def validate(self, data):
         start_date = data.get('start_date')
@@ -80,7 +80,8 @@ class BoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ("title", "description")
+        fields = ("id", "title", "description")
+        read_only_fields = ("id", )
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -92,7 +93,7 @@ class BoardSerializer(ModelSerializer):
 class TeamBoardSerializer(ModelSerializer):
     class Meta:
         model = TeamBoard
-        fields = ("title", "description", 'user', 'participants', 'admins')
+        fields = ("id", "title", "description", 'user', 'participants', 'admins')
         extra_kwargs = {
             'user': {'required': False}
         }

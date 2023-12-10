@@ -8,9 +8,9 @@ const Header = () => {
   let {user, logoutUser, continueWithGithub} = useContext(AuthContext)
   return (
     <div class="header">
-         <Link  to="/" class="icon-link" >My Boards</Link>
+         <Link  to="/boards" class="icon-link" >My Boards</Link>
          <Link  to="#" class="icon-link" >Team Boards</Link>
-         <Link  to="#" class="icon-link" >Projects</Link>
+         <Link  to="/projects" class="icon-link" >Projects</Link>
             {user ? (
              <div class="horizontal">
               <Link to="/profile" class="icon-link">Profile</Link>

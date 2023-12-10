@@ -31,7 +31,7 @@ export const AuthProvider = ({children}) => {
             setAuthTokens(data);
             setUser(jwt_decode(data.access));
             localStorage.setItem('authTokens', JSON.stringify(data));
-            history('/')
+            history('/boards')
         }
         else {
             alert("Invalid username or password!\nTry again!")
@@ -55,7 +55,7 @@ export const AuthProvider = ({children}) => {
         
         if (responce.status === 201) {
             await loginUser(e)
-            history('/')
+            history('/boards')
         }
         else {
             alert(`Invalid information or you don't fill all fields!\n${responce.statusText}\nTry again!`)
