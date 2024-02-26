@@ -4,6 +4,7 @@ services:
   django:
     build: .
     container_name: django
+    working_dir: /usr/src/taskapi/
     entrypoint: [ "entrypoint.sh" ]
     volumes:
       - .:/usr/src/taskapi
