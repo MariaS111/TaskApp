@@ -5,11 +5,11 @@ stages:
 
 destroy:
   stage: destroy
-  command: docker-compose down
+  script: docker-compose down
 
 deploy:
   stage: deploy
-  command: docker-compose up
+  script: docker-compose up
 
   
 
