@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'tasks.apps.TasksConfig',
     'users.apps.UsersConfig',
     'projects.apps.ProjectsConfig',
-    'drf_spectacular'
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -75,13 +75,6 @@ DATABASES = {
         'PORT': config('DB_PORT', 5432),
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -179,11 +172,11 @@ SIMPLE_JWT = {
 
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
-USE_DOCKER = config('USE_DOCKER', default=True)
+USE_DOCKER = config('USE_DOCKER')
 
 # CELERY
 if USE_DOCKER:
-    CELERY_BROKER_URL = 'redis://redis:6379'  # Docker
+     CELERY_BROKER_URL = 'redis://redis:6379'  # Docker
 else:
     CELERY_BROKER_URL = 'redis://localhost:6379'  # Local
 

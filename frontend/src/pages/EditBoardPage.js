@@ -75,16 +75,16 @@ const EditBoardPage = ({ match }) => {
   };
 
   return (
+
     <div>
+      <form onSubmit={handleSubmit} class="input-form for-task">
       <h2>Edit Board</h2>
-      <form onSubmit={handleSubmit}>
         <label>Title:</label>
-        <input type="text" name="title" value={boardData.title} onChange={handleInputChange} />
-
+        <input class="form-control" type="text" name="title" value={boardData.title} onChange={handleInputChange} />
         <label>Description:</label>
-        <textarea name="description" value={boardData.description} onChange={handleInputChange} />
+        <textarea class="form-control" name="description" value={boardData.description} onChange={handleInputChange} />
 
-        <button type="submit">Save Changes</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
       </form>
     </div>
   );

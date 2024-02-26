@@ -5,6 +5,7 @@ from TaskApp import settings
 
 class CustomUser(AbstractUser):
     is_verified = models.BooleanField(default=False)
+    performance_coefficient = models.FloatField(default=0.0)
 
     def __str__(self):
         return self.username

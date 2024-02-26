@@ -54,8 +54,25 @@ body{
 
 }
 
+.comments {
+    padding-top: 80px;
+}
+
+.select {
+   height: 50px;
+   z-index: 234;
+}
+
 .for-task {
-    height: 400px;
+    height: 500px;
+}
+
+.form {
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
 }
 
 .register-form {
@@ -115,14 +132,22 @@ a:hover {
     bottom: -50px;
 }
 
+.task-btns {
+    padding-top: 30px;
+    display: flex;
+    column-gap: 30px;
+}
+
 .boards {
     width: 85%;
+    padding-bottom: 30px;
 }
 
 .card {
     width: 85%;
     height: 200px;
     text-align: center;
+    border-width: 2px;
 }
 
 .card-body {

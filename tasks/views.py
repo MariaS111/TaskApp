@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+from pytz import timezone as pytz_timezone
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
@@ -110,9 +112,61 @@ class TaskViewSet(ModelViewSet):
                 return board.task_set.exclude(status='D')
             return board.task_set.filter(pk=pk).exclude(status='D')
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        if instance.status == 'D':
+            user = self.request.user
+            datetime_now = str(datetime.now())[:16]
+            dt = datetime.strptime(datetime_now, '%Y-%m-%d %H:%M')
+            dt = dt.replace(second=0, microsecond=0)
+            dt = pytz_timezone('UTC').localize(dt)
+
+            if instance.start_date != instance.end_date and dt>instance.start_date:
+                coefficient = float((dt - instance.start_date).total_seconds()) / float((instance.end_date - instance.start_date).total_seconds())
+            elif dt < instance.start_date:
+                first_var = -((dt - instance.start_date).total_seconds())
+                coefficient = float(first_var) / float(
+                    (instance.end_date - instance.start_date).total_seconds())
+
+            new_coefficient = (user.performance_coefficient + coefficient)/2
+
+            user.performance_coefficient = new_coefficient
+            user.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class TeamTaskViewSet(ModelViewSet):
     serializer_class = TeamTaskSerializer
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        if instance.status == 'D':
+            user = instance.worker
+            datetime_now = str(datetime.now())[:16]
+            dt = datetime.strptime(datetime_now, '%Y-%m-%d %H:%M')
+            dt = dt.replace(second=0, microsecond=0)
+            dt = pytz_timezone('UTC').localize(dt)
+
+            if instance.start_date != instance.end_date and dt > instance.start_date:
+                coefficient = float((dt - instance.start_date).total_seconds()) / float(
+                    (instance.end_date - instance.start_date).total_seconds())
+            elif dt < instance.start_date:
+                first_var = -((dt - instance.start_date).total_seconds())
+                print((dt - instance.start_date).total_seconds())
+                print(first_var)
+                print((instance.end_date - instance.start_date).total_seconds())
+                coefficient = float(first_var+((instance.end_date - instance.start_date).total_seconds())) / (float(
+                    (instance.end_date - instance.start_date).total_seconds()))
+
+            new_coefficient = (user.performance_coefficient + coefficient) / 2
+
+            user.performance_coefficient = new_coefficient
+            user.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_queryset(self):
         if self.request.user.is_authenticated:

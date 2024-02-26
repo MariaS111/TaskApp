@@ -96,15 +96,17 @@ return (
     
     <div className="tasks-list">
       <h3>Tasks</h3>
-      <div class="tasks">
+      <div class="div boards">
         {tasks.map(task => (
-          <div class="card text-center" key={task.id}>
+          <div class="div card text-center" key={task.id}>
+            <div class="div card-body">
             <h5 class="card-title">{task.title}</h5>
             <p class="card-text">{task.description}</p>
             {/* Добавьте другие поля задачи, которые вам нужны */}
             <Link to={`/boards/${board.id}/tasks/${task.id}`} className="btn btn-primary">
                 Show more...
             </Link>
+          </div>
           </div>
         ))}
       </div>

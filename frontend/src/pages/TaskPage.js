@@ -51,23 +51,40 @@ const handleDelete = async () => {
   }
 };
 
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'F':
+      return 'Future';
+    case 'O':
+      return 'Overdue';
+    case 'PR':
+      return 'In Progress';
+    case 'D':
+      return 'Done';
+    default:
+      return 'Unknown';
+  }
+};
+
+
 return (
   <div>
     <div>
       <h2>{tasks.title}</h2>
       <p>{tasks.description}</p>
-      <p>{tasks.start_date}</p>
-      <p>{tasks.end_date}</p>
-      <p>{tasks.updated}</p>
-      <p>{tasks.status}</p>
+      <p>Start Date: {tasks.start_date}</p>
+      <p>End Date: {tasks.end_date}</p>
+      <p>Last Updated: {tasks.updated}</p>
+      <p>Status: {getStatusLabel(tasks.status)}</p>
     </div>
-
+    <div class="task-btns">
     <Link to={`/boards/${boardId}/tasks/${tasks.id}/upd`} className="btn btn-primary">
                 Change task
       </Link>
       <button className="btn btn-primary" onClick={handleDelete}>
                 Delete task
       </button>
+      </div>
   </div>
 );
 
