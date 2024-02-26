@@ -5,7 +5,8 @@ deploy:
   stage: deploy
   tags:
     - win
-  script: docker-compose down && docker-compose up
+  before_script: docker-compose down
+  script: docker-compose up
 
   
 
