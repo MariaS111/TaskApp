@@ -1,13 +1,5 @@
 stages:
-  - destroy
-  - deploy
- 
-
-destroy:
-  stage: destroy
-  tags:
-    - win
-  script: docker-compose down
+  - deploy 
 
 deploy:
   stage: deploy
