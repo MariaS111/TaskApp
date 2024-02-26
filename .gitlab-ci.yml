@@ -1,0 +1,16 @@
+stages:
+  - destroy
+  - deploy
+ 
+
+destroy:
+  stage: destroy
+  command: docker-compose down
+
+deploy:
+  stage: deploy
+  command: docker-compose up
+
+  
+
+
