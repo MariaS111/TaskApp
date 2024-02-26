@@ -11,8 +11,8 @@ services:
       - ./media:/usr/src/taskapi/media
     ports:
       - 8000:8000
-#    env_file:
-#      - .env
+    env_file:
+      - C://PYTHON/TaskApp/.env
     depends_on:
       - pgdb
 

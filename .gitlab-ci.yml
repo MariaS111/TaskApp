@@ -5,7 +5,7 @@ deploy:
   stage: deploy
   tags:
     - win
-  script: docker-compose --env-file $envvars up
+  script: docker-compose down && docker-compose up
 
   
 
