@@ -4,8 +4,7 @@ services:
   django:
     build: .
     container_name: django
-    command: ls usr/src/taskapi/
-    #entrypoint: [ "usr/src/taskapi/entrypoint.sh" ]
+    entrypoint: [ "usr/src/taskapi/entrypoint.sh" ]
     volumes:
       - .:/usr/src/taskapi
       - ./static:/usr/src/taskapi/static
