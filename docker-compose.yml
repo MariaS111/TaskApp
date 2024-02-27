@@ -35,6 +35,8 @@ services:
       - .:/usr/src/taskapi
     container_name: celery
     working_dir: /usr/src/taskapi/
+    env_file:
+      - C://PYTHON/TaskApp/.env
     depends_on:
       - pgdb
       - redis
@@ -47,6 +49,8 @@ services:
       - .:/usr/src/taskapi/
     container_name: celery-beat
     working_dir: /usr/src/taskapi/
+    env_file:
+      - C://PYTHON/TaskApp/.env
     depends_on:
       - django
       - pgdb
