@@ -4,17 +4,7 @@ services:
   django:
     build: .
     container_name: django
-#    entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
-    command:
-      - python /usr/src/taskapi/manage.py makemigrations --noinput
-      - python /usr/src/taskapi/manage.py migrate --noinput
-      - python /usr/src/taskapi/manage.py createsuperuser --noinput  --username $DJANGO_SUPERUSER_USERNAME --email $DJANGO_SUPERUSER_EMAIL
-      - python /usr/src/taskapi/manage.py collectstatic --no-input
-      - python /usr/src/taskapi/manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/usr/src/taskapi
-      - ./static:/usr/src/taskapi/static
-      - ./media:/usr/src/taskapi/media
+    entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
     ports:
       - 8000:8000
     env_file:
@@ -34,11 +24,8 @@ services:
 
   celery:
     restart: always
-    build:
-      context: .
+    build: .
     command: celery -A TaskApp worker --loglevel=info -P eventlet
-    volumes:
-      - .:/usr/src/taskapi
     container_name: celery
     working_dir: /usr/src/taskapi/
     env_file:
@@ -51,8 +38,6 @@ services:
   celery-beat:
     build: .
     command: celery -A TaskApp beat  -l info
-    volumes:
-      - .:/usr/src/taskapi/
     container_name: celery-beat
     working_dir: /usr/src/taskapi/
     env_file:
