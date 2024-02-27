@@ -12,7 +12,7 @@ const HomePage = () => {
 
 
   let getBoards = async() =>{
-      let response = await fetch('http://127.0.0.1:8000/api/board/', {
+      let response = await fetch('http://django:8000/api/board/', {
           method:'GET',
           headers:{
               'Content-Type':'application/json',

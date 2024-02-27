@@ -12,7 +12,7 @@ const ProjectsPage = () => {
 
 
   let getProjects = async() =>{
-      let response = await fetch('http://127.0.0.1:8000/api/projects/project', {
+      let response = await fetch('http://django:8000/api/projects/project', {
           method:'GET',
           headers:{
               'Content-Type':'application/json',

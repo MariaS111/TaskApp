@@ -19,7 +19,7 @@ const EditTaskPage = ({ match }) => {
   useEffect(() => {
     const fetchTaskData = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/board/${boardId}/task/${taskId}`, {
+        const response = await fetch(`http://django:8000/api/board/${boardId}/task/${taskId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const EditTaskPage = ({ match }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/board/${boardId}/task/${taskId}/`, {
+      const response = await fetch(`http://django:8000/api/board/${boardId}/task/${taskId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

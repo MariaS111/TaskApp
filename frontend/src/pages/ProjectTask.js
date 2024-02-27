@@ -15,7 +15,7 @@ const ProjectTask = () => {
         const fetchTask = async () => {
           try {
             const taskResponse = await fetch(
-              `http://127.0.0.1:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/`,
+              `http://django:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/`,
               {
                 method: 'GET',
                 headers: {
@@ -29,7 +29,7 @@ const ProjectTask = () => {
     
             // Загрузка комментариев для задачи
             const commentsResponse = await fetch(
-              `http://127.0.0.1:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/comments/`,
+              `http://django:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/comments/`,
               {
                 method: 'GET',
                 headers: {
@@ -50,7 +50,7 @@ const ProjectTask = () => {
 
 const handleDelete = async () => {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/`, {
+    const response = await fetch(`http://django:8000/api/projects/project/${projectId}/teamboard/${boardId}/teamtask/${teamtaskId}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

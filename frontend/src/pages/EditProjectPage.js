@@ -19,7 +19,7 @@ const EditProjectPage = () => {
     useEffect(() => {
       const fetchProjectData = async () => {
         try {
-          const response = await fetch(`http://127.0.0.1:8000/api/projects/project/${projectId}`, {
+          const response = await fetch(`http://django:8000/api/projects/project/${projectId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

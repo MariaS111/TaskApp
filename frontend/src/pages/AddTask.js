@@ -19,7 +19,7 @@ function AddTaskPage() {
     e.preventDefault();
     console.log(taskData)
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/board/${boardId}/task/`, {
+      const response = await fetch(`http://django:8000/api/board/${boardId}/task/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
