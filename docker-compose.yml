@@ -4,8 +4,7 @@ services:
   django:
     build: .
     container_name: django
-    command: echo $PATH
-    entrypoint: [ "C://PYTHON/TaskApp/entrypoint.sh" ]
+    command: ./usr/src/taskapi/entrypoint.sh
     volumes:
       - .:/usr/src/taskapi
       - ./static:/usr/src/taskapi/static

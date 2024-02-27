@@ -6,7 +6,7 @@ deploy:
   tags:
     - win
   before_script: docker-compose down
-  script: docker-compose up
+  script: docker-compose up -d
 
   
 
