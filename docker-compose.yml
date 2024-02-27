@@ -4,7 +4,7 @@ services:
   django:
     build: .
     container_name: django
-#    entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
+    #entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
     command:
       - ls
     ports:
