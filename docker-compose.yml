@@ -5,10 +5,6 @@ services:
     build: .
     container_name: django
     #entrypoint: [ "/usr/src/taskapi/entrypoint.sh" ]
-    command:
-      - pwd
-      - cd /usr/src/taskapi
-      - python manage.py runserver 0.0.0.0:8000
     ports:
       - 8000:8000
     env_file:
