@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 python /usr/src/taskapi/manage.py makemigrations --noinput
 python /usr/src/taskapi/manage.py migrate --noinput
