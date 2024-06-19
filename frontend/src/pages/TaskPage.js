@@ -13,7 +13,7 @@ const TaskPage = () => {
 useEffect(() => {
   const fetchTask = async () => {
     try {
-      const boardResponse = await fetch(`http://django:8000/api/board/${boardId}/task/${taskId}`, {
+      const boardResponse = await fetch(`http://localhost:8000/api/board/${boardId}/task/${taskId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ useEffect(() => {
 
 const handleDelete = async () => {
   try {
-    const response = await fetch(`http://django:8000/api/board/${boardId}/task/${taskId}/`, {
+    const response = await fetch(`http://localhost:8000/api/board/${boardId}/task/${taskId}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

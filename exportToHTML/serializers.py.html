@@ -1,0 +1,125 @@
+<html>
+<head>
+<title>serializers.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #067d17;}
+.s3 { color: #1750eb;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+serializers.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">datetime </span><span class="s0">import </span><span class="s1">datetime, timedelta</span>
+<span class="s0">from </span><span class="s1">rest_framework </span><span class="s0">import </span><span class="s1">serializers</span>
+<span class="s0">from </span><span class="s1">rest_framework.serializers </span><span class="s0">import </span><span class="s1">ModelSerializer</span>
+<span class="s0">from </span><span class="s1">.models </span><span class="s0">import </span><span class="s1">Task, Board, TeamTask, TeamBoard, Comment</span>
+<span class="s0">from </span><span class="s1">django.core.exceptions </span><span class="s0">import </span><span class="s1">ValidationError</span>
+<span class="s0">from </span><span class="s1">pytz </span><span class="s0">import </span><span class="s1">timezone </span><span class="s0">as </span><span class="s1">pytz_timezone</span>
+
+
+<span class="s0">class </span><span class="s1">CommentSerializer(serializers.ModelSerializer):</span>
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">model = Comment</span>
+        <span class="s1">fields = [</span><span class="s2">'id'</span><span class="s1">, </span><span class="s2">'content'</span><span class="s1">, </span><span class="s2">'user'</span><span class="s1">, </span><span class="s2">'team_task'</span><span class="s1">]</span>
+        <span class="s1">read_only_fields = [</span><span class="s2">'id'</span><span class="s1">, </span><span class="s2">'user'</span><span class="s1">, </span><span class="s2">'team_task'</span><span class="s1">]</span>
+
+
+<span class="s0">class </span><span class="s1">CustomDateTimeField(serializers.DateTimeField):</span>
+    <span class="s0">def </span><span class="s1">to_representation(self, value):</span>
+        <span class="s0">if </span><span class="s1">value:</span>
+            <span class="s0">return </span><span class="s1">value.strftime(</span><span class="s2">'%Y-%m-%d %H:%M'</span><span class="s1">)</span>
+        <span class="s0">return None</span>
+
+    <span class="s0">def </span><span class="s1">to_internal_value(self, value):</span>
+        <span class="s0">try</span><span class="s1">:</span>
+            <span class="s1">dt = datetime.strptime(value, </span><span class="s2">'%Y-%m-%d %H:%M'</span><span class="s1">)</span>
+            <span class="s1">dt = dt.replace(second=</span><span class="s3">0</span><span class="s1">, microsecond=</span><span class="s3">0</span><span class="s1">)</span>
+            <span class="s1">dt = pytz_timezone(</span><span class="s2">'UTC'</span><span class="s1">).localize(dt)</span>
+            <span class="s0">return </span><span class="s1">dt</span>
+        <span class="s0">except </span><span class="s1">(ValueError, TypeError):</span>
+            <span class="s0">raise </span><span class="s1">serializers.ValidationError(</span><span class="s2">'Invalid datetime format'</span><span class="s1">)</span>
+
+
+<span class="s0">class </span><span class="s1">TaskSerializer(ModelSerializer):</span>
+    <span class="s1">start_date = CustomDateTimeField()</span>
+    <span class="s1">end_date = CustomDateTimeField()</span>
+
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">model = Task</span>
+        <span class="s1">fields = (</span><span class="s2">&quot;id&quot;</span><span class="s1">, </span><span class="s2">&quot;title&quot;</span><span class="s1">, </span><span class="s2">&quot;description&quot;</span><span class="s1">, </span><span class="s2">&quot;start_date&quot;</span><span class="s1">, </span><span class="s2">&quot;end_date&quot;</span><span class="s1">, </span><span class="s2">&quot;status&quot;</span><span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">validate(self, data):</span>
+        <span class="s1">start_date = data.get(</span><span class="s2">'start_date'</span><span class="s1">)</span>
+        <span class="s1">end_date = data.get(</span><span class="s2">'end_date'</span><span class="s1">)</span>
+
+        <span class="s0">if </span><span class="s1">start_date </span><span class="s0">and </span><span class="s1">end_date </span><span class="s0">and </span><span class="s1">start_date &gt; end_date:</span>
+            <span class="s0">raise </span><span class="s1">ValidationError(</span><span class="s2">'End date must be greater than start date'</span><span class="s1">)</span>
+
+        <span class="s0">return </span><span class="s1">data</span>
+
+    <span class="s0">def </span><span class="s1">create(self, validated_data):</span>
+        <span class="s1">board_pk = self.context[</span><span class="s2">'view'</span><span class="s1">].kwargs.get(</span><span class="s2">'board_pk'</span><span class="s1">)</span>
+        <span class="s1">validated_data[</span><span class="s2">'board_id'</span><span class="s1">] = board_pk</span>
+        <span class="s0">return </span><span class="s1">super().create(validated_data)</span>
+
+
+<span class="s0">class </span><span class="s1">TeamTaskSerializer(ModelSerializer):</span>
+    <span class="s1">start_date = CustomDateTimeField()</span>
+    <span class="s1">end_date = CustomDateTimeField()</span>
+
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">model = TeamTask</span>
+        <span class="s1">fields = (</span><span class="s2">&quot;id&quot;</span><span class="s1">, </span><span class="s2">&quot;title&quot;</span><span class="s1">, </span><span class="s2">&quot;description&quot;</span><span class="s1">, </span><span class="s2">&quot;start_date&quot;</span><span class="s1">, </span><span class="s2">&quot;end_date&quot;</span><span class="s1">, </span><span class="s2">&quot;status&quot;</span><span class="s1">, </span><span class="s2">&quot;worker&quot;</span><span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">validate(self, data):</span>
+        <span class="s1">start_date = data.get(</span><span class="s2">'start_date'</span><span class="s1">)</span>
+        <span class="s1">end_date = data.get(</span><span class="s2">'end_date'</span><span class="s1">)</span>
+
+        <span class="s0">if </span><span class="s1">start_date </span><span class="s0">and </span><span class="s1">end_date </span><span class="s0">and </span><span class="s1">start_date &gt; end_date:</span>
+            <span class="s0">raise </span><span class="s1">ValidationError(</span><span class="s2">'End date must be greater than start date'</span><span class="s1">)</span>
+
+        <span class="s0">return </span><span class="s1">data</span>
+
+    <span class="s0">def </span><span class="s1">create(self, validated_data):</span>
+        <span class="s1">teamboard_pk = self.context[</span><span class="s2">'view'</span><span class="s1">].kwargs.get(</span><span class="s2">'teamboard_pk'</span><span class="s1">)</span>
+        <span class="s1">team_board = TeamBoard.objects.get(pk=teamboard_pk)</span>
+        <span class="s1">validated_data[</span><span class="s2">'team_board'</span><span class="s1">] = team_board</span>
+        <span class="s0">return </span><span class="s1">super().create(validated_data)</span>
+
+
+<span class="s0">class </span><span class="s1">BoardSerializer(ModelSerializer):</span>
+
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">model = Board</span>
+        <span class="s1">fields = (</span><span class="s2">&quot;id&quot;</span><span class="s1">, </span><span class="s2">&quot;title&quot;</span><span class="s1">, </span><span class="s2">&quot;description&quot;</span><span class="s1">)</span>
+        <span class="s1">read_only_fields = (</span><span class="s2">&quot;id&quot;</span><span class="s1">, )</span>
+
+    <span class="s0">def </span><span class="s1">create(self, validated_data):</span>
+        <span class="s1">request = self.context.get(</span><span class="s2">'request'</span><span class="s1">)</span>
+        <span class="s1">user = request.user </span><span class="s0">if </span><span class="s1">request </span><span class="s0">else None</span>
+        <span class="s1">validated_data[</span><span class="s2">'user'</span><span class="s1">] = user</span>
+        <span class="s0">return </span><span class="s1">super().create(validated_data)</span>
+
+
+<span class="s0">class </span><span class="s1">TeamBoardSerializer(ModelSerializer):</span>
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">model = TeamBoard</span>
+        <span class="s1">fields = (</span><span class="s2">&quot;id&quot;</span><span class="s1">, </span><span class="s2">&quot;title&quot;</span><span class="s1">, </span><span class="s2">&quot;description&quot;</span><span class="s1">, </span><span class="s2">'user'</span><span class="s1">, </span><span class="s2">'participants'</span><span class="s1">, </span><span class="s2">'admins'</span><span class="s1">)</span>
+        <span class="s1">extra_kwargs = {</span>
+            <span class="s2">'user'</span><span class="s1">: {</span><span class="s2">'required'</span><span class="s1">: </span><span class="s0">False</span><span class="s1">}</span>
+        <span class="s1">}</span>
+
+    <span class="s0">def </span><span class="s1">create(self, validated_data):</span>
+        <span class="s1">request = self.context.get(</span><span class="s2">'request'</span><span class="s1">)</span>
+        <span class="s1">user = request.user </span><span class="s0">if </span><span class="s1">request </span><span class="s0">else None</span>
+        <span class="s1">validated_data[</span><span class="s2">'user'</span><span class="s1">] = user</span>
+        <span class="s0">return </span><span class="s1">super().create(validated_data)</span>
+</pre>
+</body>
+</html>

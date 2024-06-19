@@ -1,0 +1,43 @@
+<html>
+<head>
+<title>models.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #1750eb;}
+.s3 { color: #067d17;}
+.s4 { color: #0037a6;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+models.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">django.db </span><span class="s0">import </span><span class="s1">models</span>
+<span class="s0">from </span><span class="s1">django.contrib.auth.models </span><span class="s0">import </span><span class="s1">AbstractUser</span>
+<span class="s0">from </span><span class="s1">TaskApp </span><span class="s0">import </span><span class="s1">settings</span>
+
+
+<span class="s0">class </span><span class="s1">CustomUser(AbstractUser):</span>
+    <span class="s1">is_verified = models.BooleanField(default=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s1">performance_coefficient = models.FloatField(default=</span><span class="s2">0.0</span><span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">__str__(self):</span>
+        <span class="s0">return </span><span class="s1">self.username</span>
+
+    <span class="s0">class </span><span class="s1">Meta:</span>
+        <span class="s1">verbose_name = </span><span class="s3">'CustomUser'</span>
+        <span class="s1">verbose_name_plural = </span><span class="s3">'CustomUsers'</span>
+
+
+<span class="s0">class </span><span class="s1">Profile(models.Model):</span>
+    <span class="s1">user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name=</span><span class="s3">'userprofile'</span><span class="s1">)</span>
+    <span class="s1">profile_image = models.ImageField(upload_to=</span><span class="s3">'users_profile_images/'</span><span class="s1">, blank=</span><span class="s0">True</span><span class="s1">, default=</span><span class="s3">'base.png'</span><span class="s1">)</span>
+
+    <span class="s0">def </span><span class="s1">__str__(self):</span>
+        <span class="s0">return </span><span class="s3">f'</span><span class="s4">{</span><span class="s1">self.user.username</span><span class="s4">} </span><span class="s3">Profile'</span></pre>
+</body>
+</html>

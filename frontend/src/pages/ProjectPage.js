@@ -15,7 +15,7 @@ useEffect(() => {
   // Получаем информацию о доске
   const fetchProjectInfo = async () => {
     try {
-      const boardResponse = await fetch(`http://django:8000/api/projects/project/${projectId}/`, {
+      const boardResponse = await fetch(`http://localhost:8000/api/projects/project/${projectId}/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ useEffect(() => {
   // Получаем список тасков для доски
   const fetchBoards = async () => {
     try {
-      const tasksResponse = await fetch(`http://django:8000/api/projects/project/${projectId}/teamboard/`, {
+      const tasksResponse = await fetch(`http://localhost:8000/api/projects/project/${projectId}/teamboard/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ useEffect(() => {
 
 const handleDelete = async () => {
   try {
-    const response = await fetch(`http://django:8000/api/projects/project/${projectId}`, {
+    const response = await fetch(`http://localhost:8000/api/projects/project/${projectId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

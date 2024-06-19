@@ -15,7 +15,7 @@ const EditBoardPage = ({ match }) => {
   useEffect(() => {
     const fetchBoardData = async () => {
       try {
-        const response = await fetch(`http://django:8000/api/board/${boardId}`, {
+        const response = await fetch(`http://localhost:8000/api/board/${boardId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

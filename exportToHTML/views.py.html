@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>views.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #067d17;}
+.s3 { color: #0037a6;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+views.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">jwt</span>
+<span class="s0">from </span><span class="s1">django.conf </span><span class="s0">import </span><span class="s1">settings</span>
+<span class="s0">from </span><span class="s1">django.contrib.sites.shortcuts </span><span class="s0">import </span><span class="s1">get_current_site</span>
+<span class="s0">from </span><span class="s1">django.urls </span><span class="s0">import </span><span class="s1">reverse</span>
+<span class="s0">from </span><span class="s1">drf_yasg </span><span class="s0">import </span><span class="s1">openapi</span>
+<span class="s0">from </span><span class="s1">drf_yasg.utils </span><span class="s0">import </span><span class="s1">swagger_auto_schema</span>
+<span class="s0">from </span><span class="s1">rest_framework </span><span class="s0">import </span><span class="s1">status</span>
+<span class="s0">from </span><span class="s1">rest_framework.response </span><span class="s0">import </span><span class="s1">Response</span>
+<span class="s0">from </span><span class="s1">rest_framework.views </span><span class="s0">import </span><span class="s1">APIView</span>
+<span class="s0">from </span><span class="s1">rest_framework_simplejwt.tokens </span><span class="s0">import </span><span class="s1">RefreshToken</span>
+<span class="s0">from </span><span class="s1">.models </span><span class="s0">import </span><span class="s1">Profile, CustomUser</span>
+<span class="s0">from </span><span class="s1">rest_framework.generics </span><span class="s0">import </span><span class="s1">RetrieveUpdateAPIView, UpdateAPIView, GenericAPIView, ListAPIView</span>
+<span class="s0">from </span><span class="s1">rest_framework_simplejwt.views </span><span class="s0">import </span><span class="s1">TokenObtainPairView</span>
+<span class="s0">from </span><span class="s1">.serializers </span><span class="s0">import </span><span class="s1">MyTokenObtainPairSerializer, ProfileSerializer, RegistrationSerializer, CustomUserSerializer, \</span>
+    <span class="s1">CustomUserSerializerforGET</span>
+<span class="s0">from </span><span class="s1">rest_framework.permissions </span><span class="s0">import </span><span class="s1">AllowAny, IsAuthenticated</span>
+<span class="s0">from </span><span class="s1">.tasks </span><span class="s0">import </span><span class="s1">send_verify_email</span>
+
+
+<span class="s0">class </span><span class="s1">RegisterView(GenericAPIView):</span>
+    <span class="s1">serializer_class = RegistrationSerializer</span>
+    <span class="s1">permission_classes = (AllowAny,)</span>
+
+    <span class="s0">def </span><span class="s1">post(self, request):</span>
+        <span class="s1">user = request.data</span>
+        <span class="s1">serializer = self.serializer_class(data=user)</span>
+        <span class="s1">serializer.is_valid(raise_exception=</span><span class="s0">True</span><span class="s1">)</span>
+        <span class="s1">serializer.save()</span>
+        <span class="s1">user_data = serializer.data</span>
+        <span class="s1">user = CustomUser.objects.get(email=user_data[</span><span class="s2">'email'</span><span class="s1">])</span>
+        <span class="s1">token = RefreshToken.for_user(user).access_token</span>
+        <span class="s1">current_site = get_current_site(request).domain</span>
+        <span class="s1">relativeLink = reverse(</span><span class="s2">'verify_email'</span><span class="s1">)</span>
+        <span class="s1">absurl = </span><span class="s2">'http://' </span><span class="s1">+ current_site + relativeLink + </span><span class="s2">'?token=' </span><span class="s1">+ str(token)</span>
+        <span class="s1">email_body = </span><span class="s2">'Hello' </span><span class="s1">+ </span><span class="s2">' ' </span><span class="s1">+ user.username + </span><span class="s2">'</span><span class="s3">\n</span><span class="s2">' </span><span class="s1">+ </span><span class="s2">'Use link below to verify your email</span><span class="s3">\n</span><span class="s2">' </span><span class="s1">+ absurl</span>
+        <span class="s1">data = {</span><span class="s2">'email_body'</span><span class="s1">: email_body, </span><span class="s2">'to_email'</span><span class="s1">: user.email, </span><span class="s2">'email_subject'</span><span class="s1">: </span><span class="s2">'Verify your email'</span><span class="s1">}</span>
+        <span class="s1">send_verify_email.delay(data)</span>
+        <span class="s0">return </span><span class="s1">Response(user_data, status=status.HTTP_201_CREATED)</span>
+
+
+<span class="s0">class </span><span class="s1">VerifyEmail(APIView):</span>
+    <span class="s1">serializer_class = MyTokenObtainPairSerializer</span>
+
+    <span class="s1">token_param_config = openapi.Parameter(</span><span class="s2">'token'</span><span class="s1">, in_=openapi.IN_QUERY, description=</span><span class="s2">'DESCRIPTION'</span><span class="s1">,</span>
+                                           <span class="s1">type=openapi.TYPE_STRING)</span>
+
+    <span class="s1">@swagger_auto_schema(manual_parameters=[token_param_config])</span>
+    <span class="s0">def </span><span class="s1">get(self, request):</span>
+        <span class="s1">token = request.GET.get(</span><span class="s2">'token'</span><span class="s1">)</span>
+        <span class="s0">try</span><span class="s1">:</span>
+            <span class="s1">payload = jwt.decode(token, settings.SECRET_KEY, algorithms=</span><span class="s2">'HS256'</span><span class="s1">)</span>
+            <span class="s1">user = CustomUser.objects.get(id=payload[</span><span class="s2">'user_id'</span><span class="s1">])</span>
+            <span class="s0">if not </span><span class="s1">user.is_verified:</span>
+                <span class="s1">user.is_verified = </span><span class="s0">True</span>
+                <span class="s1">user.save()</span>
+            <span class="s0">return </span><span class="s1">Response({</span><span class="s2">'email'</span><span class="s1">: </span><span class="s2">'Successfully activated'</span><span class="s1">}, status=status.HTTP_200_OK)</span>
+        <span class="s0">except </span><span class="s1">jwt.ExpiredSignatureError:</span>
+            <span class="s0">return </span><span class="s1">Response({</span><span class="s2">'error'</span><span class="s1">: </span><span class="s2">'Activation link expired'</span><span class="s1">}, status=status.HTTP_400_BAD_REQUEST)</span>
+        <span class="s0">except </span><span class="s1">jwt.exceptions.DecodeError:</span>
+            <span class="s0">return </span><span class="s1">Response({</span><span class="s2">'error'</span><span class="s1">: </span><span class="s2">'Invalid token'</span><span class="s1">}, status=status.HTTP_400_BAD_REQUEST)</span>
+
+
+<span class="s0">class </span><span class="s1">MyTokenObtainPairView(TokenObtainPairView):</span>
+    <span class="s1">serializer_class = MyTokenObtainPairSerializer</span>
+    <span class="s1">permission_classes = (AllowAny,)</span>
+
+
+<span class="s0">class </span><span class="s1">UserProfileView(RetrieveUpdateAPIView):</span>
+    <span class="s1">queryset = CustomUser.objects.all()</span>
+    <span class="s1">serializer_class = CustomUserSerializer</span>
+    <span class="s1">permission_classes = (IsAuthenticated,)</span>
+
+    <span class="s0">def </span><span class="s1">get_object(self):</span>
+        <span class="s0">return </span><span class="s1">self.request.user</span>
+
+
+<span class="s0">class </span><span class="s1">AvatarUpdateView(UpdateAPIView):</span>
+    <span class="s1">queryset = Profile.objects.all()</span>
+    <span class="s1">serializer_class = ProfileSerializer</span>
+    <span class="s1">permission_classes = (IsAuthenticated,)</span>
+
+    <span class="s0">def </span><span class="s1">get_object(self):</span>
+        <span class="s0">return </span><span class="s1">self.request.user.userprofile</span>
+
+    <span class="s0">def </span><span class="s1">perform_update(self, serializer):</span>
+        <span class="s1">instance = self.get_object()</span>
+        <span class="s1">serializer.save(user=instance.user)</span>
+
+
+<span class="s0">class </span><span class="s1">UsersAllView(ListAPIView):</span>
+    <span class="s1">queryset = CustomUser.objects.all()</span>
+    <span class="s1">serializer_class = CustomUserSerializerforGET</span>
+    <span class="s1">permission_classes = (IsAuthenticated,)</span>
+</pre>
+</body>
+</html>

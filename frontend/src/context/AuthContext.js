@@ -17,7 +17,7 @@ export const AuthProvider = ({children}) => {
 
     let loginUser = async (e) => {
         e.preventDefault()
-        let responce = await fetch('http://django:8000/api/users/token/', {
+        let responce = await fetch('http://localhost:8000/api/users/token/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -42,7 +42,7 @@ export const AuthProvider = ({children}) => {
     
     let registerUser = async (e) => {
         e.preventDefault()
-        let responce = await fetch('http://django:8000/api/users/register/', {
+        let responce = await fetch('http://localhost:8000/api/users/register/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -72,7 +72,7 @@ export const AuthProvider = ({children}) => {
 
     let updateToken = async () => {
         console.log("Updated")
-        let responce = await fetch('http://django:8000/api/users/token/refresh/', {
+        let responce = await fetch('http://localhost:8000/api/users/token/refresh/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

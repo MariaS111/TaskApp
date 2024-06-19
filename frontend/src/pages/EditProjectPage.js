@@ -19,7 +19,7 @@ const EditProjectPage = () => {
     useEffect(() => {
       const fetchProjectData = async () => {
         try {
-          const response = await fetch(`http://django:8000/api/projects/project/${projectId}`, {
+          const response = await fetch(`http://localhost:8000/api/projects/project/${projectId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ const EditProjectPage = () => {
   
       const fetchAllUsers = async () => {
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/users/all_users', {
+          const response = await fetch('http://localhost:8000/api/users/all_users', {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const EditProjectPage = () => {
         console.log(allUsers.results);
          console.log(projectData.user);
 
-        const response = await fetch(`http://127.0.0.1:8000/api/projects/project/${projectId}/`, {
+        const response = await fetch(`http://localhost:8000/api/projects/project/${projectId}/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

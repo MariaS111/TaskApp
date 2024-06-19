@@ -14,7 +14,7 @@ function AddProjectPage() {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://django:8000/api/projects/project/', {
+      const response = await fetch('http://localhost:8000/api/projects/project/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
